@@ -1,0 +1,253 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>TTS</title>
+    <link
+      href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/css/bootstrap.min.css"
+      rel="stylesheet"
+      integrity="sha384-rbsA2VBKQhggwzxH7pPCaAqO46MgnOM80zW1RWuH61DGLwZJEdK2Kadq2F9CUG65"
+      crossorigin="anonymous"
+    />
+  </head>
+  <body>
+    <div class="container mt-4">
+      <div class="row">
+        <div class="col text-center">
+          <h1 class="display-1">Text To Speech</h1>
+        </div>
+      </div>
+      <div class="row mt-4">
+        <div class="col">
+          <form>
+            <div class="mb-3">
+              <label for="text" class="form-label">Enter your text</label>
+              <textarea
+                class="form-control"
+                placeholder="Hello world"
+                id="text"
+              ></textarea>
+            </div>
+
+            <div class="mb-3 col">
+              <label for="voice" class="form-label">Select the voice</label>
+              <select
+                id="voice"
+                class="form-select"
+                aria-label="Default select example"
+              ></select>
+            </div>
+
+            <div class="mb-3">
+              <label for="volume" class="form-label">Select the volume</label>
+              <div class="row">
+                <div class="col-11">
+                  <input
+                    type="range"
+                    class="form-range"
+                    id="volume"
+                    min="0"
+                    max="1"
+                    step="0.1"
+                    value="0.5"
+                  />
+                </div>
+                <div id="valueVolume" class="col-1">0.5</div>
+              </div>
+            </div>
+
+            <div class="mb-3">
+              <label for="rate" class="form-label">Select rate</label>
+              <div class="row">
+                <div class="col-11">
+                  <input
+                    type="range"
+                    class="form-range"
+                    id="rate"
+                    min="0.1"
+                    max="3"
+                    step="0.1"
+                    value="1"
+                  />
+                </div>
+                <div id="valueRate" class="col-1">1</div>
+              </div>
+            </div>
+
+            <div class="mb-3">
+              <label for="pitch" class="form-label">Select pitch</label>
+              <div class="row">
+                <div class="col-11">
+                  <input
+                    type="range"
+                    class="form-range"
+                    id="pitch"
+                    min="0"
+                    max="2"
+                    step="0.1"
+                    value="1"
+                  />
+                </div>
+                <div id="valuePitch" class="col-1">1</div>
+              </div>
+            </div>
+            <div class="mb-3">
+              <div class="row">
+                <div class="col-6 d-grid gap-2">
+                  <button id="btnStop" class="btn btn-lg btn-danger">
+                    <svg
+                      xmlns="http://www.w3.org/2000/svg"
+                      width="48"
+                      height="48"
+                      viewBox="0 0 24 24"
+                      style="fill: rgba(255, 255, 255, 1)"
+                    >
+                      <path
+                        d="M12 2C6.486 2 2 6.486 2 12s4.486 10 10 10 10-4.486 10-10S17.514 2 12 2zm0 18c-4.411 0-8-3.589-8-8s3.589-8 8-8 8 3.589 8 8-3.589 8-8 8z"
+                      ></path>
+                      <path d="M9 9h6v6H9z"></path>
+                    </svg>
+                  </button>
+                </div>
+                <div class="col-6 d-grid gap-2">
+                  <button id="btnPlay" class="btn btn-lg btn-success">
+                    <svg
+                      xmlns="http://www.w3.org/2000/svg"
+                      width="48"
+                      height="48"
+                      viewBox="0 0 24 24"
+                      style="fill: rgba(255, 255, 255, 1)"
+                    >
+                      <path
+                        d="M12 2C6.486 2 2 6.486 2 12s4.486 10 10 10 10-4.486 10-10S17.514 2 12 2zm0 18c-4.411 0-8-3.589-8-8s3.589-8 8-8 8 3.589 8 8-3.589 8-8 8z"
+                      ></path>
+                      <path d="m9 17 8-5-8-5z"></path>
+                    </svg>
+                  </button>
+                </div>
+              </div>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+    <div class="text-center p-4 fixed-bottom bg-light">
+      © 2023 Cristian Gavilan, Reference:
+      <a
+        class="text-reset fw-bold"
+        href="https://developer.mozilla.org/en-US/docs/Web/API/SpeechSynthesis"
+        >MDN</a
+      >
+    </div>
+    <script
+      src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/js/bootstrap.bundle.min.js"
+      integrity="sha384-kenU1KFdBIe4zVF0s0G1M5b4hcpxyD9F7jL+jjXkk+Q2h455rYXK/7HAuoJl+0I4"
+      crossorigin="anonymous"
+    ></script>
+    <script>
+      // Elements in vars
+      const synth = window.speechSynthesis;
+      const form = document.querySelector('form');
+      const text = document.querySelector('#text');
+      const volume = document.querySelector('#volume');
+      const rate = document.querySelector('#rate');
+      const pitch = document.querySelector('#pitch');
+      const voice = document.querySelector('#voice');
+      const btnStop = document.querySelector('#btnStop');
+      const btnPlay = document.querySelector('#btnPlay');
+
+      let voices = [];
+      // Information of langs
+      function populateVoiceList() {
+        if (typeof speechSynthesis === 'undefined') {
+          return;
+        }
+
+        voices = speechSynthesis.getVoices();
+
+        for (let i = 0; i < voices.length; i++) {
+          const option = document.createElement('option');
+          option.textContent = `${voices[i].name} (${voices[i].lang})`;
+
+          if (voices[i].default) {
+            option.textContent += ' — DEFAULT';
+          }
+
+          option.setAttribute('data-lang', voices[i].lang);
+          option.setAttribute('data-name', voices[i].name);
+          voice.appendChild(option);
+        }
+      }
+
+      populateVoiceList();
+      if (
+        typeof speechSynthesis !== 'undefined' &&
+        speechSynthesis.onvoiceschanged !== undefined
+      ) {
+        speechSynthesis.onvoiceschanged = populateVoiceList;
+      }
+      //   Speak
+      function speak() {
+        if (synth.speaking) {
+          console.error('speechSynthesis.speaking');
+          return;
+        }
+
+        if (text.value !== '') {
+          const utterThis = new SpeechSynthesisUtterance(text.value);
+
+          utterThis.onend = function (event) {
+            console.log('SpeechSynthesisUtterance.onend');
+          };
+
+          utterThis.onerror = function (event) {
+            console.error('SpeechSynthesisUtterance.onerror', event.error);
+          };
+
+          const selectedOption =
+            voice.selectedOptions[0].getAttribute('data-name');
+
+          for (let i = 0; i < voices.length; i++) {
+            if (voices[i].name === selectedOption) {
+              utterThis.voice = voices[i];
+              break;
+            }
+          }
+          utterThis.volume = volume.value;
+          utterThis.pitch = pitch.value;
+          utterThis.rate = rate.value;
+          synth.speak(utterThis);
+        }
+      }
+      //   Execute & Stop
+      form.onsubmit = function (event) {
+        event.preventDefault();
+        speak();
+      };
+
+      btnPlay.onclick = (event) => {
+        event.preventDefault();
+        speak();
+      };
+
+      btnStop.onclick = (event) => {
+        event.preventDefault();
+        synth.cancel();
+      };
+      //   Listeners
+      text.onkeyup = (event) => {
+        // console.log(text.value);
+      };
+      volume.onchange = () => {
+        document.querySelector('#valueVolume').innerHTML = volume.value;
+      };
+      rate.onchange = () => {
+        document.querySelector('#valueRate').innerHTML = rate.value;
+      };
+      pitch.onchange = () => {
+        document.querySelector('#valuePitch').innerHTML = pitch.value;
+      };
+    </script>
+  </body>
+</html>
